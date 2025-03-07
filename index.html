@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -34,66 +33,115 @@
             position: relative;
             z-index: 2;
         }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn.red { background: #d10000; color: white; }
+        .btn.blue { background: #007bff; color: white; }
+        .btn.gray { background: #444; color: white; }
+        .btn:hover { opacity: 0.8; }
+        .title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            font-size: 0.9em;
+            color: #bbb;
+            margin-bottom: 15px;
+        }
         #chart-container {
             width: 100%;
             height: 350px;
         }
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.1);
+            z-index: 1;
+            user-select: none;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
+    <div class="watermark">FAZRRINDONESIA</div>
     <div class="container">
-        <h2>Varcel Dstat Request Count Check</h2>
+        <div class="title">Varcel Dstat Request count Check</div>
+        <div class="subtitle">https://www.fazrrhost-site.my.id/api/request-count</div>
+        <div class="button-group">
+            <button class="btn red" onclick="copyToClipboard()">Copy URL</button>
+            <a href="https://check-host.net/check-http?host=https://www.fazrrhost-site.my.id/api/request-count" class="btn blue" target="_blank">WHOIS</a>
+            <a href="https://check-host.net/check-http?host=https://www.fazrrhost-site.my.id/api/request-count" class="btn gray" target="_blank">HTTP-CHECK</a>
+        </div>
         <div id="chart-container"></div>
     </div>
-    
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            let chart = Highcharts.chart('chart-container', {
-                chart: {
-                    type: 'spline',
-                    animation: Highcharts.svg,
-                    backgroundColor: 'transparent',
-                },
-                title: { text: '', style: { color: 'white' } },
-                xAxis: {
-                    type: 'datetime',
-                    tickPixelInterval: 150,
-                    labels: { style: { color: 'white' } }
-                },
-                yAxis: {
-                    title: { text: 'Request Count', style: { color: 'white' } },
-                    min: 0,
-                    labels: { style: { color: 'white' } },
-                    gridLineColor: 'rgba(255,255,255,0.2)'
-                },
-                tooltip: {
-                    headerFormat: '<b>{series.name}</b><br>',
-                    pointFormat: '{point.x:%H:%M:%S}: {point.y}'
-                },
-                legend: { enabled: false },
-                series: [{
-                    name: 'Requests',
-                    data: [],
-                    color: 'red',
-                    marker: { enabled: false }
-                }],
-                credits: { enabled: false }
+        function copyToClipboard() {
+            const url = "https://www.fazrrhost-site.my.id/api/request-count";
+            navigator.clipboard.writeText(url).then(() => {
+                alert("URL copied to clipboard!");
+            }).catch(err => {
+                console.error("Failed to copy: ", err);
             });
-
-            function updateChart() {
-                fetch('https://www.fazrrhost-site.my.id/api/request-count')
-                    .then(res => res.json())
-                    .then(data => {
-                        let x = (new Date()).getTime();
-                        let y = data.requestCount || 0;
-                        chart.series[0].addPoint([x, y], true, chart.series[0].data.length > 30);
-                    })
-                    .catch(err => console.warn("Fetch error:", err));
-            }
-
-            updateChart(); // Jalankan pertama kali sebelum interval
-            setInterval(updateChart, 1000);
+        }document.addEventListener("DOMContentLoaded", function () {
+        let chart = Highcharts.chart('chart-container', {
+            chart: {
+                type: 'area',
+                backgroundColor: 'transparent',
+                animation: Highcharts.svg,
+            },
+            title: { text: '', style: { color: 'white' } },
+            xAxis: {
+                type: 'datetime',
+                tickPixelInterval: 150,
+                labels: { style: { color: 'white' } }
+            },
+            yAxis: {
+                title: { text: 'Values', style: { color: 'white' } },
+                min: 0,
+                labels: { style: { color: 'white' } },
+                gridLineColor: 'rgba(255,255,255,0.2)'
+            },
+            legend: { enabled: false },
+            series: [{
+                name: 'Requests',
+                data: [],
+                color: 'red',
+                fillOpacity: 0.2
+            }],
+            credits: { enabled: false }
         });
-    </script>
+        function updateChart() {
+            fetch('/api/request-count')
+                .then(res => res.json())
+                .then(data => {
+                    let x = (new Date()).getTime();
+                    let y = data.requestCount;
+                    chart.series[0].addPoint([x, y], true, chart.series[0].data.length > 30);
+                })
+                .catch(err => console.error("Fetch error:", err));
+        }
+
+        setInterval(updateChart, 1000);
+    });
+</script>
+
 </body>
 </html>
